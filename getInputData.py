@@ -1,13 +1,13 @@
 from pandas import pandas as pd
 import numpy as np
 
-bedIntersectPath = "../../bedIntersectWaWbTFBSinGenes.bed"
-filteredBedIntersectPath = "bedIntersectWaWbTFBSinGenesFiltered.tsv"
-tfbsCountsInTissuesPath = "tfbsCountsInTissues.tsv"
-tfAndTissuesPath = "tfAndTissues.tsv"
-tfAndTissuesTopPath = "tfAndTissues-top.tsv"
+bedIntersectPath = "../results/bedIntersectWaWbTFBSinGenes.bed"
+filteredBedIntersectPath = "../results/bedIntersectWaWbTFBSinGenesFiltered.tsv"
+tfbsCountsInTissuesPath = "../results/tfbsCountsInTissues.tsv"
+tfAndTissuesPath = "../results/tfAndTissues.tsv"
+tfAndTissuesTopPath = "../results/tfAndTissues-top.tsv"
 
-genesPerTissueFolder = "genesPerTissue"
+genesPerTissueFolder = "../input/genesPerTissue"
 tissueNames = ["adrenal_gland", "brain", "breast", "colon", "heart", "kidney", "leukocyte", "liver", "lung", "lymph_node", "ovary", "prostate", "skeletal_muscle", "testis", "thyriod"]
 genesPerTissue = dict()
 tissuePerGene = dict()

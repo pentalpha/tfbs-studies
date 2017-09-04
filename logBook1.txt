@@ -1,0 +1,17 @@
+Arquivo de transcription factors: TFBS-ENCODE.bed
+Arquivo de referência dos genes: coord_upstream5kb_refGene.bed
+
+Este comando também escreve no arquivo transcription factors para os quais não foram encontrados genes.
+
+bedtools intersect -loj -a TFBS-ENCODE.bed -b ./coord_upstream5kb_refGene.bed  > newBedOutput2.txt
+
+Tamanho da saída: +- 250MB
+3.928.074 linhas
+
+Este comando se mostrou eficiente para encontrar interseções da forma que queriamos:
+
+bedtools intersect -wa -wb -a TFBS-ENCODE.bed -b coord_upstream5kb_refGene.bed > bedIntersectWaWbTFBSinGenes.bed
+
+Tamanho da saída: +- 196MB
+1.969.951 linhas, ou seja, quase 2 milhões de transcription factors relacionados a algum gene no arquivo de referência.
+Disponível em: http://10.7.5.38/~pitagoras/TF-findings/bedIntersectWaWbTFBSinGenes.bed

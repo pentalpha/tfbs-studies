@@ -1,0 +1,33 @@
+Input data:
+	TFBSs intersected with genes in .bed
+	For each tissue:
+		Genes with Differential Expression
+
+Desired Output:
+	TFs differentially expressed in certain tissues
+
+Using pandas dataframe to load the .bed file
+Using a dict to load the gene list of each tissue
+
+Create a dataframe with the number of BSs of a TF in each tissue
+	Store mean number of BSs per tissue of each TF
+#The "diffFactor" measures how much the number of BSs of a TF in a tissue is above the mean.
+Calculate diffFactor for each pair of tissue and TF, store it all in a pandas dataframe.
+Filter the top 5% values.
+Sort by diffFactor.
+Save results.
+
+New measure to representation:
+            WithBSToTF ALL
+TESTIS      127         1225
+ALL-TISSUE  472         21000
+
+
+Random simulation:
+Select random sets of 1225 genes
+    Count number of genes with BS to TF
+Make a distribuition
+Position the amount found (127) in the distribution
+
+Usar Z score?
+Usar x²

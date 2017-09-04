@@ -37,38 +37,7 @@ def readAllTissueGenes():
         for tissueName in tissueNames:
                 readGenesFromTissue(tissueName)
                 
-def decideBetwenGeneNames(row):
-    names = row['geneFullName'].split(sep=',')
-    for name in names:
-        if name in geneNames:
-            return name
-    return ''
 
-def addGeneAandBNamesToTSVFile(filePath):
-    bedIntersectDf = pd.read_csv(filePath, sep='\t')
-    
-    print("Choosing new gene names")
-    bedIntersectDf['geneFullName'] = bedIntersectDf.apply(lambda row: decideBetwenGeneNames(row), axis=1)
-    print("Droping gene names that were not found in tissues")
-    bedIntersectDf = bedIntersectDf[bedIntersectDf.geneFullName != '']
-    print("Droping useless columns")
-    bedIntersectDf.drop('columnX', axis=1, inplace=True)
-    bedIntersectDf.drop('columnY', axis=1, inplace=True)
-    bedIntersectDf.drop('columnZ', axis=1, inplace=True)
-    bedIntersectDf.drop('tfbsChr', axis=1, inplace=True)
-    bedIntersectDf.drop('tfbsPosB', axis=1, inplace=True)
-    bedIntersectDf.drop('tfbsPosA', axis=1, inplace=True)
-    bedIntersectDf.drop('geneChr', axis=1, inplace=True)
-    bedIntersectDf.drop('genePosA', axis=1, inplace=True)
-    bedIntersectDf.drop('genePosB', axis=1, inplace=True)
-    return bedIntersectDf
-
-def createFilteredDf():
-    print("Treating data:")
-    treatedDf = addGeneAandBNamesToTSVFile(bedIntersectPath)
-    print("Treated data")
-    print("Writing data")
-    treatedDf.to_csv(filteredBedIntersectPath, sep='\t', index=False)
 
 def addTfbsToTfCounts(row):
     geneName = row['geneFullName']

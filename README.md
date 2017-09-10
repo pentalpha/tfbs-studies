@@ -59,6 +59,10 @@ Output:
 - [bedIntersectWaWbTFBSinGenesFiltered.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenesFiltered.tsv)
 
 ### Task 2.2 Transcription Factor representativity in tissues
+> Here’s how you do it for RPKM: First, count up the total reads in a sample and divide that number by 1,000,000 – this is our “per million” scaling factor. Then, divide the read counts by the “per million” scaling factor. This normalizes for sequencing depth, giving you reads per million (RPM). Finally, divide the RPM values by the length of the gene, in kilobases. This gives you RPKM. (RNA-Seq blog)
+
+> FPKM is very similar to RPKM. RPKM was made for single-end RNA-seq, where every read corresponded to a single fragment that was sequenced. FPKM was made for paired-end RNA-seq. With paired-end RNA-seq, two reads can correspond to a single fragment, or, if one read in the pair did not map, one read can correspond to a single fragment. The only difference between RPKM and FPKM is that FPKM takes into account that two reads can map to one fragment (and so it doesn’t count this fragment twice). (also RNA-Seq blog)
+
 Now we want to calculate, for each transcription factor, the sum of the FPKMs (of each tissue) of the genes which have binding sites to that transcription factor. The resulting table would have the following columns:
 
 tfName | adipose_tissue | adrenal_gland | ... | genesWithBS | mean | stDeviation
@@ -97,6 +101,66 @@ Output:
 - [tfFPKMinTissues.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/tfFPKMinTissues.tsv)
 
 ### Task 2.3 Filtering pairs of Tissue with TF using Z-Score and Quantile
+> When a frequency distribution is normally distributed, we can find out the probability of a score occurring by standardising the scores, known as standard scores (or z scores). The standard normal distribution simply converts the group of data in our frequency distribution such that the mean is 0 and the standard deviation is 1. (Laerd Statistics)
+
+For a transcription factor *tf* and a tissue *ts*, the z-score is:
+```py
+z-score = (fpkmSum(tf, ts) - meanFpkmSum(tf)) / standardDeviationForFpkmSums(tf)
+```
+(Note that, for each tissue, the transcription factor will have a different Z-Score.)
+
+We want to create a table with the following data:
+
+tfName | tissue | genesWithBS | fpkmSum | mean | stDeviation | zScore
+--- | --- | --- | --- | --- | --- | ---
+Transcription factor name | Tissue name | Number of genes with binding sites to TF in this tissue | Sum of the tissue FPKM values of all the genes with a binding site to the TF | Mean FPKM sum of TF for all tissues | Standard deviation in FPKM sums | The Z-Score
+
+The rows for such a table are created using the following function:
+```py
+def getZScoreRows(row, newDFRows):
+    mean = row["mean"]
+    std = row["stDeviation"]
+    for tissueName in tissueNames:
+        newRow = dict()
+        newRow["tfName"] = row["tfName"]
+        newRow["tissue"] = tissueName
+        newRow["genesWithBS"] = row["genesWithBS"]
+        newRow["fpkmSum"] = row[tissueName]
+        newRow["mean"] = mean
+        newRow["stDeviation"] = std
+        if(std != 0.0):
+            newRow["zScore"] = (row[tissueName] - mean) / std
+        else:
+            newRow["zScore"] = 0.0
+        newDFRows.append(newRow)
+```
+In [3-zScoreOf-TFxTissue.py](3-zScoreOf-TFxTissue.py).
+
+In these rows, the Z-Score quantifies how much the representativity of a TF in a tissue deviates from what would be normal for that TF. So the TFs we are looking for must have very big or very low Z-Scores. Now, all we need to do is filter the rows according to the Z-Scores.
+
+For a given quantitative column in a Pandas DataFrame, the function "df['columnName'].quantile(0.XX)" returns a value in the column, so that XX% of the values are smaller or equal to it. Using this value, we can filter the top 5% and bottom 5% of the Z-Score rows:
+```py
+#top and bottom percentage to be taken:
+percent = 0.05
+
+zScoreTopQuantile = zScoreDf['zScore'].quantile(1.0-percent)
+zScoreBottomQuantile = zScoreDf['zScore'].quantile(percent)
+zScoreTop = zScoreDf[zScoreDf.zScore >= zScoreTopQuantile]
+zScoreTop.to_csv(zScoreOfTFxTissueTopPath, sep="\t", index=False)
+zScoreBottom = zScoreDf[zScoreDf.zScore <= zScoreBottomQuantile]
+zScoreBottom.to_csv(zScoreOfTFxTissueBottomPath, sep="\t", index=False)
+```
+In [4-filterTFsByZScore.py](4-filterTFsByZScore.py).
+
+Outputs:
+- [zScoreOfTFxTissue-Top.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Top.tsv)
+- [zScoreOfTFxTissue-Bottom.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Bottom.tsv)
+- [zScoreOfTFxTissue.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue.tsv)
 
 ## References
-Khan Academy. Gene regulation. <https://www.khanacademy.org/science/biology/gene-regulation>.
+
+Khan Academy. [Gene regulation](https://www.khanacademy.org/science/biology/gene-regulation).
+
+RNA-Seq Blog. [RPKM, FPKM and TPM clearly explained](http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/).
+
+Lard Statistics. [Standard Score](https://statistics.laerd.com/statistical-guides/standard-score.php).

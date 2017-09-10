@@ -58,18 +58,45 @@ The script used to do this was [1-filterIntersectionBed.py](1-filterIntersection
 Output:
 - [bedIntersectWaWbTFBSinGenesFiltered.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenesFiltered.tsv)
 
-### Task 2.2 
+### Task 2.2 Transcription Factor representativity in tissues
+Now we want to calculate, for each transcription factor, the sum of the FPKMs (of each tissue) of the genes which have binding sites to that transcription factor. The resulting table would have the following columns:
 
-Using pandas dataframe to load the .bed file
-Using a dict to load the gene list of each tissue
+tfName | adipose_tissue | adrenal_gland | ... | genesWithBS | mean | stDeviation
+--- | --- | --- | --- | --- | --- | ---
+Transcription Factor name | Sum of the FPKMs in adipose tissue | the same for adrenal_gland | more sums for more tissues | Count of genes with binding sites to TF | Mean FPKM sum | Standard deviation of FPKM sum
 
-Create a dataframe with the number of BSs of a TF in each tissue
-	Store mean number of BSs per tissue of each TF
-#The "diffFactor" measures how much the number of BSs of a TF in a tissue is above the mean.
-Calculate diffFactor for each pair of tissue and TF, store it all in a pandas dataframe.
-Filter the top 5% values.
-Sort by diffFactor.
-Save results.
+This is similar to the reference expression file with the FPKM values, but this table is about the transcription factors, not the genes.
+
+The function to create the columns is:
+```py
+def getTFRow(tFactorName):
+    print("\tStarting for " + tFactorName)
+    tfDF = filteredBedIntersectDf[filteredBedIntersectDf.tfName == tFactorName]
+    newRow = dict()
+    newRow["tfName"] = tFactorName
+    nGenes = 0
+    for tissue in tissueNames:
+        newRow[tissue] = 0.0
+    for index, row in tfDF.iterrows():
+        gName = row['geneFullName']
+        #this for loo is suposed to have only 1 iteration, unless there are 2
+        #or more genes with he same name
+        for geneIndex, geneRow in geneFpkmDf[geneFpkmDf.geneName == gName].iterrows():
+            nGenes += 1
+            for tissue in tissueNames:
+                newRow[tissue] += geneRow[tissue]
+    newRow["genesWithBS"] = nGenes
+    print("\tDone for " + tFactorName)
+    return newRow
+```
+In [2-makeTFactorDf.py](2-makeTFactorDf.py)
+
+These columns are computed using Python's "multiprocessing.Pool", to maximize performance in multi-core systems.
+
+Output:
+- [tfFPKMinTissues.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/tfFPKMinTissues.tsv)
+
+### Task 2.3 Filtering pairs of Tissue with TF using Z-Score and Quantile
 
 ## References
 Khan Academy. Gene regulation. <https://www.khanacademy.org/science/biology/gene-regulation>.

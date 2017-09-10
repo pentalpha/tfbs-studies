@@ -6,13 +6,13 @@ from multiprocessing import Pool
 
 filteredBedIntersectPath = "../results/bedIntersectWaWbTFBSinGenesFiltered.tsv"
 humanGenesFPKMInTissues = "../input/table_Human_body_map_ze_FPKM.txt"
-tfFPKMInTissuesPath = "../results/tfFPKMinTissues2.tsv"
+tfFPKMInTissuesPath = "../results/tfFPKMinTissues.tsv"
 tissueNames = ["adipose_tissue", "adrenal_gland", "brain", "breast", "colon",
                "heart", "kidney", "leukocyte", "liver", "lung", "lymph_node", "ovary",
                "prostate", "skeletal_muscle", "testis", "thyriod"]
 
 #random sample size: 15%
-percent = 0.33
+percent = 0.15
 
 print("<Reading input data>")
 filteredBedIntersectDf = pd.read_csv(filteredBedIntersectPath, sep="\t")

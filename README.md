@@ -157,6 +157,53 @@ Outputs:
 - [zScoreOfTFxTissue-Bottom.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Bottom.tsv)
 - [zScoreOfTFxTissue.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue.tsv)
 
+### Task 2.4 Make TFs files per Tissue
+Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TFs related with every gene and and using the files .txt found [here](http://177.20.147.141/~pitagoras/TF-findings/input/genesPerTissue/), we can know the genes founded in every tissue. We just want to know what are the transcription factors pertaining in every tissue based on their genes .txt file. So for every gene pertained in a tissue, we will be going to add all the transcription factors related with that gene, leaving just:
+
+| tfName   |
+|----------|
+| ...      |
+| NF-YA    |
+| Pol2-4H8 |
+| CTCF     |
+| CTCF     |
+| ...      |
+
+The script used to do this was [5-makeTFsPerTissue.py](5-makeTFsPerTissue.py).
+
+Output:
+- [adipose_tissue_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/adipose_tissue_tfs.txt)
+- [adrenal_gland_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/adrenal_gland_tfs.txt)
+- [brain_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/brain_tfs.txt)
+- [breast_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/breast_tfs.txt)
+- [colon_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/colon_tfs.txt)
+- [heart_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/heart_tfs.txt)
+- [kidney_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/kidney_tfs.txt)
+- [leukocyte_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/leukocyte_tfs.txt)
+- [liver_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/liver_tfs.txt)
+- [lung_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/li_tfs.txt)
+- [lymph_node_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/lymph_node_tfs.txt)
+- [ovary_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/ovary_tfs.txt)
+- [prostate_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/prostate_tfs.txt)
+- [skeletal_muscle_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/skeletal_muscle_tfs.txt)
+- [testis_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/testis_tfs.txt)
+- [thyriod_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/thyriod_tfs.txt)
+
+### Task 2.5 Filtering quantity of genes for every TF in every tissue
+Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TFs related with every gene and using the files .txt found [here](http://177.20.147.141/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/), we can know all the TFs founded and their frequence in every tissue. We just want to know quantity of genes for every TF in every tissue. So for every TF found in a tissue, we will be going to count his frequency, leaving just:
+
+| tfName   | all_genes | adipose_tissue | adrenal_gland | ... | testis | thyriod |
+|----------|-----------|----------------|---------------|-----|--------|---------|
+| Pol2     | 76789     | 12             | 26            | ... | 739    | 13      |
+| Pol2-4H8 | 63732     | 4              | 30            | ... | 628    | 11      |
+| TAF1     | 58550     | 3              | 26            | ... | 563    | 9       |
+| ...      | ...       | ...            | ...           | ... | ...    | ...     |
+
+The script used to do this was [6-filterGenesByTFs.py](6-filterGenesByTFs.py).
+
+Output:
+- [tfByGenesAndTissues.tsv](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/tfByGenesAndTissues.tsv)
+
 ## References
 
 Khan Academy. [Gene regulation](https://www.khanacademy.org/science/biology/gene-regulation).

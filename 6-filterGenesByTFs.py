@@ -3,14 +3,14 @@ import pandas as pd
 import numpy as np
 
 def main():
-    filteredBedIntersect = "../results/bedIntersectWaWbTFBSinGenesFiltered.tsv"
-    tfByGenesAndTissues = "../results/tfByGenesAndTissues.tsv"
+    filteredBedIntersectPath = "../results/bedIntersectWaWbTFBSinGenesFiltered.tsv"
+    tfByGenesAndTissuesPath = "../results/tfByGenesAndTissues.tsv"
     tissueNames = ["adipose_tissue", "adrenal_gland", "brain", "breast", "colon",
                    "heart", "kidney", "leukocyte", "liver", "lung", "lymph_node", "ovary",
                    "prostate", "skeletal_muscle", "testis", "thyriod"]
 
     print("<Reading input data>")
-    filteredBedIntersect = pd.read_csv(filteredBedIntersect, sep="\t")
+    filteredBedIntersect = pd.read_csv(filteredBedIntersectPath, sep="\t")
     
     #start dict with 0 values for the frequencies
     tfbsByTF = dict()
@@ -36,8 +36,9 @@ def main():
         tfRows.append(newRow)
         
     tfDf = pd.DataFrame(tfRows, columns=(['tfName'] + tissueNames))
-    tfDf.to_csv(tfByGenesAndTissues, sep="\t", index=False)
-    print("</Dataframe saved at " + tfByGenesAndTissues + ">")
+    tfDf['allTissues'] = tfDf[np.array(list(tissueNames))].sum(axis=1)
+    tfDf.to_csv(tfByGenesAndTissuesPath, sep="\t", index=False)
+    print("</Dataframe saved at " + tfByGenesAndTissuesPath + ">")
 
 if __name__ == "__main__":
     main()

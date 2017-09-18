@@ -61,8 +61,9 @@ def writeTFlistForTissue(tissue):
     print("<Started listing for " + tissue + ">")
     tissueTFs = "results/TFsPerTissue/" + tissue + "_tfs.txt"
     with open(fileRelativeToParentDir(tissueTFs), 'w') as output:
+        output.write("tfName\tfrequency\n")
         for tfName in tfsInTissue[tissue]:
-            output.write(tfName + "\n")
+            output.write(tfName + "\t" + str(tfsInTissue[tissue][tfName]) + "\n")
         output.close()
     print("</TF list saved at " + tissueTFs + ">")
 

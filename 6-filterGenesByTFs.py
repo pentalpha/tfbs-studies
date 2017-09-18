@@ -11,25 +11,32 @@ def main():
 
     print("<Reading input data>")
     filteredBedIntersect = pd.read_csv(filteredBedIntersect, sep="\t")
-    filteredBedIntersect = filteredBedIntersect['tfName'].value_counts().reset_index()
-    filteredBedIntersect.columns = ['tfName', 'all_genes']
-
+    
+    #start dict with 0 values for the frequencies
+    tfbsByTF = dict()
+    for tfName in filteredBedIntersect['tfName'].unique():
+        tfbsByTF[tfName] = dict()
+        for tissueName in tissueNames:
+            tfbsByTF[tfName][tissueName] = 0
+            
+    #read tf frequency on tissues from lists        
     for tissue in tissueNames:
-        tissueTFs = "../results/TFsPerTissue/" + tissue + "_tfs.txt"
-        tissueTFs = pd.read_csv(tissueTFs, header=None)
-        tissueTFs = tissueTFs[0].value_counts().reset_index()
-        tissueTFs.columns = ['tfName', 'frequency']
-        frequencyTFs = []
-        for tf in filteredBedIntersect['tfName']:
-            tf = tissueTFs.loc[tissueTFs['tfName'] == tf].reset_index(drop=True)
-            if tf.empty:
-                frequencyTFs.append(0)
-            else:
-                frequencyTFs.append(tf['frequency'][0])
-            print (frequencyTFs)
-        filteredBedIntersect[tissue] = frequencyTFs
-
-    filteredBedIntersect = pd.DataFrame(filteredBedIntersect).to_csv(tfByGenesAndTissues, sep="\t", index=False)
+        tissueTFsPath = "../results/TFsPerTissue/" + tissue + "_tfs.txt"
+        tissueTFs = pd.read_csv(tissueTFsPath, sep='\t')
+        for index, row in tissueTFs.iterrows():
+            tfbsByTF[row['tfName']][tissue] += row['frequency']
+    
+    #create rows for new df        
+    tfRows = []
+    for tfName in filteredBedIntersect['tfName'].unique():
+        newRow = dict()
+        newRow['tfName'] = tfName
+        for tissueName in tissueNames:
+            newRow[tissueName] = tfbsByTF[tfName][tissueName]
+        tfRows.append(newRow)
+        
+    tfDf = pd.DataFrame(tfRows, columns=(['tfName'] + tissueNames))
+    tfDf.to_csv(tfByGenesAndTissues, sep="\t", index=False)
     print("</Dataframe saved at " + tfByGenesAndTissues + ">")
 
 if __name__ == "__main__":

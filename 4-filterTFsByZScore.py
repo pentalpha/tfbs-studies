@@ -18,6 +18,6 @@ percent = 0.05
 zScoreTopQuantile = zScoreDf['zScore'].quantile(1.0-percent)
 zScoreBottomQuantile = zScoreDf['zScore'].quantile(percent)
 zScoreTop = zScoreDf[zScoreDf.zScore >= zScoreTopQuantile]
-zScoreTop.to_csv(zScoreOfTFxTissueTopPath, sep="\t", index=False)
+#zScoreTop.to_csv(zScoreOfTFxTissueTopPath, sep="\t", index=False)
 zScoreBottom = zScoreDf[zScoreDf.zScore <= zScoreBottomQuantile]
-zScoreBottom.to_csv(zScoreOfTFxTissueBottomPath, sep="\t", index=False)
+#zScoreBottom.to_csv(zScoreOfTFxTissueBottomPath, sep="\t", index=False)

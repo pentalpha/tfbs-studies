@@ -6,8 +6,10 @@ Created on Mon Sep  4 15:32:58 2017
 @author: pitagoras
 """
 import pandas as pd
+import numpy as np
 
 geneNames = set()
+bindingSiteFrequency = dict()
 
 humanGenesFPKMInTissues = "../input/table_Human_body_map_ze_FPKM.txt"
 bedIntersectPath = "../results/bedIntersectWaWbTFBSinGenes.bed"
@@ -28,7 +30,8 @@ def decideBetwenGeneNames(row):
 
 def addGeneAandBNamesToTSVFile(filePath):
     bedIntersectDf = pd.read_csv(filePath, sep='\t')
-    
+    bedIntersectDf = bedIntersectDf.iloc[np.random.choice(bedIntersectDf.index,
+                                              int(len(bedIntersectDf)*1))]
     print("Choosing new gene names")
     bedIntersectDf['geneFullName'] = bedIntersectDf.apply(lambda row: decideBetwenGeneNames(row), axis=1)
     print("Droping gene names that were not found in tissues")
@@ -47,12 +50,29 @@ def addGeneAandBNamesToTSVFile(filePath):
     bedIntersectDf.drop('genePosB', axis=1, inplace=True)
     return bedIntersectDf
 
-def createFilteredDf():
-    print("Treating data:")
-    treatedDf = addGeneAandBNamesToTSVFile(bedIntersectPath)
-    print("Treated data")
-    print("Writing data")
-    treatedDf.to_csv(filteredBedIntersectPath, sep='\t', index=False)
+def startBsFrequency(row):
+    if (row['tfName'],row['geneFullName']) not in bindingSiteFrequency:
+        bindingSiteFrequency[(row['tfName'],row['geneFullName'])] = 0
+
+def increaseBsFrequency(row):
+    bindingSiteFrequency[(row['tfName'],row['geneFullName'])] += 1    
 
 readGeneNames()
-createFilteredDf()
+print("Treating data:")
+treatedDf = addGeneAandBNamesToTSVFile(bedIntersectPath)
+print("Starting to count binding site frequencies")
+treatedDf.apply(lambda row: startBsFrequency(row), axis=1)
+print("Counting binding site frequencies")
+treatedDf.apply(lambda row: increaseBsFrequency(row), axis=1)
+rows = []
+for entry in bindingSiteFrequency:
+    newRow = dict()
+    newRow['tfName'] = entry[0]
+    newRow['geneName'] = entry[1]
+    newRow['count'] = bindingSiteFrequency[entry]
+    rows.append(newRow)
+
+treatedDf = pd.DataFrame(rows, columns=['tfName','geneName','count'])
+print("Treated data")
+print("Writing data")
+treatedDf.to_csv(filteredBedIntersectPath, sep='\t', index=False)

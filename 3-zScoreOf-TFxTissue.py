@@ -15,7 +15,7 @@ def getZScoreRows(row, newDFRows):
         newRow = dict()
         newRow["tfName"] = row["tfName"]
         newRow["tissue"] = tissueName
-        newRow["genesWithBS"] = row["genesWithBS"]
+        newRow["bindingSites"] = row["bindingSites"]
         newRow["fpkmSum"] = row[tissueName]
         newRow["mean"] = mean
         newRow["stDeviation"] = std
@@ -24,12 +24,11 @@ def getZScoreRows(row, newDFRows):
         else:
             newRow["zScore"] = 0.0
         newDFRows.append(newRow)
-        
 
 def calcExpressionForEachTissue(tFactorDF):
     newDFRows = []
     tFactorDF.apply(lambda row: getZScoreRows(row, newDFRows), axis=1)
-    zScoreDf = pd.DataFrame(newDFRows, columns=['tfName', 'tissue', 'genesWithBS',
+    zScoreDf = pd.DataFrame(newDFRows, columns=['tfName', 'tissue', 'bindingSites',
                                                     'fpkmSum', 'mean', 'stDeviation', 
                                                     'zScore'])
     #zScoreDf.sort_values()

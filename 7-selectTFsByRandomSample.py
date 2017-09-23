@@ -10,6 +10,7 @@ import numpy as np
 import os.path
 from scipy import stats
 from multiprocessing import Pool
+import matplotlib.pyplot as plt
 
 scriptpath = os.path.dirname(__file__)
 
@@ -22,68 +23,70 @@ tissueNames = ["adipose_tissue", "adrenal_gland", "brain", "breast", "colon",
            "heart", "kidney", "leukocyte", "liver", "lung", "lymph_node", "ovary",
            "prostate", "skeletal_muscle", "testis", "thyriod"]
 
-percent = 5.0
-nSamples = 2000
+percent = 10.0/2.0
+nSamples = 4000
 
+#key: tissueName, value: set of genes representative to tissueName
 genesPerTissue = dict()
-tissuePerGene = dict()
+#set of all geneNames
 geneNames = set()
-tfsInTissue = dict()
+#set of tfNames
 tfs = set()
+#key: tfName, value: set of genes with at least one binding site to tfName
 genesWithBSTo = dict()
+#key: tissueName, value: list of random subsets of 'geneNames'
 geneSamples = dict()
-tfbs = dict()
-
-filteredBedIntersect = pd.read_csv(filteredBedIntersectPath, sep="\t")
+#key: (tfName, geneName), value: number of binding sites
+tfbsCount = dict()
 
 def fileRelativeToParentDir(file):
     return os.path.join(os.path.dirname(scriptpath), file)
 
 def readGenesFromTissue(tissueName):
-        if tissueName not in genesPerTissue:
-            genesPerTissue[tissueName] = set()
-            
-        fileName = genesPerTissueFolder + "/" + tissueName + ".txt"
-        f = open(fileName, 'r')
+    if tissueName not in genesPerTissue:
+        genesPerTissue[tissueName] = set()
         
-        for line in f:
-            gene = line.replace('\n', '')
-            genesPerTissue[tissueName].add(gene)
-            
-            if gene not in tissuePerGene:
-                tissuePerGene[gene] = list()
-            tissuePerGene[gene].append(tissueName)
-            
-            geneNames.add(gene)
-        f.close()
+    fileName = genesPerTissueFolder + "/" + tissueName + ".txt"
+    f = open(fileName, 'r')
+    
+    for line in f:
+        gene = line.replace('\n', '')
+        genesPerTissue[tissueName].add(gene)
+        
+        geneNames.add(gene)
+    f.close()
 
 def readAllTissueGenes():
-        for tissueName in tissueNames:
-                readGenesFromTissue(tissueName)
-                
-def addTFBScount(row, ts):
-        tfbs[(row['tfName'], ts)] = row[ts]
+    for tissueName in tissueNames:
+            readGenesFromTissue(tissueName)
+
+def listGenesWithBS(row):
+    if row['tfName'] in genesWithBSTo:
+        genesWithBSTo[row['tfName']].add(row['geneName'])
+
+def countTFBS(row):
+    tfbsCount[(row['tfName'], row['geneName'])] = row['count']
                 
 def readTfAndGeneNames():
-    for geneName in filteredBedIntersect['geneFullName'].unique().tolist():
+    filteredBedIntersect = pd.read_csv(filteredBedIntersectPath, sep="\t")
+    print("\tListing genes")
+    for geneName in filteredBedIntersect['geneName'].unique().tolist():
         geneNames.add(geneName)
-        
-    tfByGenesAndTissues = pd.read_csv(tfByGenesAndTissuesPath, sep='\t')
-    tfByGenesAndTissues = tfByGenesAndTissues[tfByGenesAndTissues.allTissues > 8]
-    
-    for ts in tissueNames:
-        tfByGenesAndTissues.apply(lambda row: addTFBScount(row, ts), axis=1)
-        
-    for tfName in tfByGenesAndTissues['tfName'].unique().tolist():
+    print("\tListing TFs")    
+    for tfName in filteredBedIntersect['tfName'].unique().tolist():
         tfs.add(tfName)
         
     for tfName in tfs:
         genesWithBSTo[tfName] = set()
+    print("\tListing genes with binding site to TFs")
+    filteredBedIntersect.apply(lambda row: listGenesWithBS(row), axis=1)
+    print("\tCounting BS for each TFxGene")
+    filteredBedIntersect.apply(lambda row: countTFBS(row), axis=1)
 
-def createGeneSamplesForTissue(tissueName):
+def createGeneSamplesForTissue(tissueName,samplesAmount=nSamples):
     nGenesForTissue = len(genesPerTissue[tissueName])
     geneSamples[tissueName] = list()
-    todo = nSamples
+    todo = samplesAmount
     while(todo > 0):
         geneSet = set()
         genesChosen = np.random.choice(list(geneNames), nGenesForTissue)
@@ -95,73 +98,88 @@ def createGeneSamplesForTissue(tissueName):
 def createAllGeneSamples():
     for tissueName in tissueNames:
         createGeneSamplesForTissue(tissueName)
-        print("Sampled " + tissueName + " tissue!")
-                        
+        print("\tSampled " + tissueName + " tissue!")
+            
+def countBSToTFinGeneSet(geneSet, tfName):
+    total = 0
+    for geneName in geneSet:
+        if (tfName, geneName) in tfbsCount:
+            total += tfbsCount[(tfName, geneName)]
+            #print("tfbsCount[("+tfName+","+geneName+")]="+str(tfbsCount[(tfName, geneName)]))
+    return total
+
+def getBsCountInSamples(tfName, tissueName):
+    genesWithBS = genesWithBSTo[tfName]
+    bsCountInSamples = []
+    for sample in geneSamples[tissueName]:
+        geneSet = sample.intersection(genesWithBS)
+        bsCount = countBSToTFinGeneSet(geneSet, tfName)
+        bsCountInSamples.append(bsCount)
+    return bsCountInSamples
+            
 def qualifyTFAtTissue(tfName, tissueName):
     genesWithBS = genesWithBSTo[tfName]
-    genesInTissue = genesPerTissue[tissueName].intersection(genesWithBS)
-    sampleIntersections = []
-    for sample in geneSamples[tissueName]:
-        nGenes = len(sample.intersection(genesWithBS))
-        sampleIntersections.append(nGenes)
-    res = stats.percentileofscore(sampleIntersections, len(genesInTissue), 'weak')
-    return res
+    genesInTissueWithBs = genesPerTissue[tissueName].intersection(genesWithBS)
+    bsCountInTissue = countBSToTFinGeneSet(genesInTissueWithBs, tfName)
+    bsCountInSamples = getBsCountInSamples(tfName, tissueName)
+    bsCountInSamples.append(bsCountInTissue)
+    
+    npArray = np.asarray(bsCountInSamples)
+    std = npArray.std()
+    median = np.median(npArray)
+    perc = stats.percentileofscore(bsCountInSamples, bsCountInTissue, 'weak')
+    return (perc, median, std, bsCountInTissue, len(genesInTissueWithBs))
 
-def qualifyTFForEachTissue(tfName):
-    row = dict()
-    row['tfName'] = tfName
-    for tissueName in tissueNames:
-        row[tissueName] = qualifyTFAtTissue(tfName, tissueName)
-    return row
+def makeRows(tfName):
+    rowsCreated = []
+    for ts in tissueNames:
+        newRow = dict()
+        newRow['tfName'] = tfName
+        newRow['tissue'] = ts
+        newRow['tissue_genes'] = len(genesPerTissue[ts])
+        perc, median, std, bsCountInTissue, genesInTissueWithBs = qualifyTFAtTissue(tfName, ts)
+        newRow['tissue_genes_with_bs'] = genesInTissueWithBs
+        newRow['tissue_tfbs'] = bsCountInTissue
+        newRow['mt_median'] = median
+        newRow['mt_std'] = std
+        newRow['mt_percentile'] = perc
+        rowsCreated.append(newRow)
+    return rowsCreated
 
-def getDFforAllTFs():
-    print("<Creating rows>")
+def createMainDF():
     pool = Pool(processes = 5)
-    rows = pool.map(qualifyTFForEachTissue, tfs)
+    rawRows = pool.map(makeRows, tfs)
     pool.close()
     pool.join()
-    print("</Created rows>")
-    df = pd.DataFrame(rows, columns=(['tfName'] + tissueNames))
-    return df
-
-def separateDFInTuples(generalDF):
     rows = []
-    def makeRows(originalRow):
-        for ts in tissueNames:
-            newRow = dict()
-            tfName = originalRow['tfName']
-            newRow['tfName'] = tfName
-            newRow['tissue'] = ts
-            if (originalRow['tfName'], ts) in tfbs:
-                newRow['tfbs_count'] = tfbs[(tfName, ts)]
-            else:
-                newRow['tfbs_count'] = 0
-            newRow['tfbs_count_all'] = len(genesWithBSTo[tfName])
-            newRow['percentile'] = originalRow[ts]
-            rows.append(newRow)
-    generalDF.apply(lambda row: makeRows(row), axis=1)
-    return pd.DataFrame(rows, columns=['tfName', 'tissue', 'tfbs_count',
-                                       'tfbs_count_all', 'percentile'])
+    for rowSet in rawRows:
+        rows += rowSet
+    return pd.DataFrame(rows, columns=['tfName', 'tissue', 'tissue_genes', 
+                                       'tissue_genes_with_bs', 'tissue_tfbs',
+                                       'mt_median', 'mt_std', 'mt_percentile'])
 
-print("Loading input")    
-readAllTissueGenes()
-readTfAndGeneNames()
-print("Creating samples")
-createAllGeneSamples()
-print("Reading genes per TF, this may take a while")
+def createDFs():
+    tfAndTissueDF = createMainDF()
+    topDF = tfAndTissueDF[tfAndTissueDF.mt_percentile >= (100.0 - percent)]
+    topDF = topDF.sort_values(['mt_percentile'], ascending=False)
+    topDF.to_csv(mostRepresentativeTFsPerTissuePath, sep='\t', index=False)
+    
+    bottomDF = tfAndTissueDF[tfAndTissueDF.mt_percentile <= percent]
+    bottomDF = bottomDF.sort_values(['mt_percentile'], ascending=True)
+    bottomDF.to_csv(leastRepresentativeTFsPerTissuePath, sep='\t', index=False)
 
-def countGenesWithBS(row):
-    if row['tfName'] in genesWithBSTo:
-        genesWithBSTo[row['tfName']].add(row['geneFullName'])    
-filteredBedIntersect.apply(lambda row: countGenesWithBS(row), axis=1)
+def histForTFandTissue(tfName, tissue, nbins=120, samples=nSamples):
+    createGeneSamplesForTissue(tissue,samplesAmount=samples)
+    vals = getBsCountInSamples(tfName, tissue)
+    n, bins, patches = plt.hist(vals,bins=nbins)
+    plt.show()
 
-generalDF = getDFforAllTFs()
-tfAndTissueDF = separateDFInTuples(generalDF)
-topDF = tfAndTissueDF[tfAndTissueDF.tfbs_count > 0]
-topDF = topDF[topDF.percentile >= (100.0 - percent)]
-topDF = topDF.sort_values(['percentile'], ascending=False)
-topDF.to_csv(mostRepresentativeTFsPerTissuePath, sep='\t', index=False)
+def loadAll():
+    print("Loading input")    
+    readAllTissueGenes()
+    readTfAndGeneNames()
+    print("Creating samples")
+    createAllGeneSamples()
 
-bottomDF = tfAndTissueDF[tfAndTissueDF.percentile <= percent]
-bottomDF = bottomDF.sort_values(['percentile'], ascending=True)
-bottomDF.to_csv(leastRepresentativeTFsPerTissuePath, sep='\t', index=False)
+loadAll()
+createDFs()

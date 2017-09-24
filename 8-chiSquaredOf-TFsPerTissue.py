@@ -37,8 +37,8 @@ def main():
               if p_value <= 0.05:
                   chiSquaredTFs = chiSquaredTFs.append([{'tfName':tf["tfName"], 'Chi-Square Test':chi_squared_test, 'P-Value':p_value, 'State':state}])
           chiSquaredTFs = chiSquaredTFs.sort_values(by='P-Value')
-          chiSquaredTFs = pd.DataFrame(chiSquaredTFs).to_csv(chiSquaredTFsPerTissuePath + tissue + ".tsv", sep="\t", index=False)
-          print("</Dataframe saved at " + chiSquaredTFsPerTissuePath + tissue + ".tsv" + ">")
+          chiSquaredTFs = pd.DataFrame(chiSquaredTFs).to_csv(chiSquaredTFsPerTissuePath + tissue + "_chi.tsv", sep="\t", index=False)
+          print("</Dataframe saved at " + chiSquaredTFsPerTissuePath + tissue + "_chi.tsv" + ">")
 
 if __name__ == "__main__":
     main()

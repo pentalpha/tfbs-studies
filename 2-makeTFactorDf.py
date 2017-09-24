@@ -43,9 +43,10 @@ def getTFRow(tFactorName):
         #or more genes with he same name
         for geneIndex, geneRow in geneFpkmDf[geneFpkmDf.geneName == gName].iterrows():
             nGenes += 1
-            bindingSites += 1
+            bindingSites += nBindingSites
             for tissue in tissueNames:
                 newRow[tissue] += geneRow[tissue]*nBindingSites
+            break
     newRow["genesWithBS"] = nGenes
     newRow["bindingSites"] = bindingSites
     print("\tDone for " + tFactorName)

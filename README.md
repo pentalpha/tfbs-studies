@@ -29,7 +29,7 @@ Ouput size: +- 196MB
 
 Available at: http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenes.bed
 
-## Task 2. Finding Transcription Factors related with tissues
+## Task 2: Finding Transcription Factors related with tissues using FPKM values
 Input data:
 - Human TFBSs intersected with genes in .bed ([link](http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenes.bed))
 - Expression (FPKM) of human genes in each tissue, tabular table in .txt ([link](http://177.20.147.141/~pitagoras/TF-findings/input/table_Human_body_map_ze_FPKM.txt))
@@ -39,35 +39,37 @@ Desired Output:
 
 The idea here is finding out Transcription Factors which, compared with their representation in all tissues, are very or less related to specific tissues. Since this is a more complex task, we will separate it in several subtasks:
 
-### Task 2.1 Filtering intersection .bed archive from previous task
+### Task 2.1: Filtering intersection .bed archive from previous task
 The intersection .bed archive has a lot of information that are not useful for this task. We just want to know if the transcription factors had intersections with genes (and what genes). So we will delete most columns, leaving just:
 
-tfName | geneFullName
---- | ---
-TAF1 | MIR1302-11
-TAF1 | WASH7P
-HEY1 | MIR1302-2
-HEY1 | MIR1302-10
+tfName | geneName | count
+--- | --- | ---
+TAF1 | MIR1302-11 | 12
+TAF1 | WASH7P | 5
+HEY1 | MIR1302-2 | 1
+HEY1 | MIR1302-10 | 2
 ... | ...
 
 All this says is that MIR1302-11 and WASH7P have binding sites to TAF1, MIR1302-2 and MIR1302-10 have to HEY1 and so on...
-The names at "geneFullName" are an abreviation of the gene name column at the original .bed file. Gene names not found at the reference FPKM file are discarted.
+The names at "gene" are an abreviation of the gene name column at the original .bed file. Gene names not found at the reference FPKM file are discarted.
+
+For each individual gene, there can be more than one binding site to the same transcription factor. The 'count' column is this number of binding sites.
 
 The script used to do this was [1-filterIntersectionBed.py](1-filterIntersectionBed.py).
 
 Output:
 - [bedIntersectWaWbTFBSinGenesFiltered.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenesFiltered.tsv)
 
-### Task 2.2 Transcription Factor representativity in tissues
+### Task 2.2: Transcription Factor representativity in tissues
 > Here’s how you do it for RPKM: First, count up the total reads in a sample and divide that number by 1,000,000 – this is our “per million” scaling factor. Then, divide the read counts by the “per million” scaling factor. This normalizes for sequencing depth, giving you reads per million (RPM). Finally, divide the RPM values by the length of the gene, in kilobases. This gives you RPKM. (RNA-Seq blog)
 
 > FPKM is very similar to RPKM. RPKM was made for single-end RNA-seq, where every read corresponded to a single fragment that was sequenced. FPKM was made for paired-end RNA-seq. With paired-end RNA-seq, two reads can correspond to a single fragment, or, if one read in the pair did not map, one read can correspond to a single fragment. The only difference between RPKM and FPKM is that FPKM takes into account that two reads can map to one fragment (and so it doesn’t count this fragment twice). (also RNA-Seq blog)
 
 Now we want to calculate, for each transcription factor, the sum of the FPKMs (of each tissue) of the genes which have binding sites to that transcription factor. The resulting table would have the following columns:
 
-tfName | adipose_tissue | adrenal_gland | ... | genesWithBS | mean | stDeviation
+tfName | adipose_tissue | adrenal_gland | ... | genesWithBS | bindingSites | mean | stDeviation
 --- | --- | --- | --- | --- | --- | ---
-Transcription Factor name | Sum of the FPKMs in adipose tissue | the same for adrenal_gland | more sums for more tissues | Count of genes with binding sites to TF | Mean FPKM sum | Standard deviation of FPKM sum
+Transcription Factor name | Sum of the FPKMs in adipose tissue | the same for adrenal_gland | more sums for more tissues | Count of genes with binding sites to TF | Total of binding sites to the TF in all tissues | Mean FPKM sum | Standard deviation of FPKM sum
 
 This is similar to the reference expression file with the FPKM values, but this table is about the transcription factors, not the genes.
 
@@ -79,17 +81,21 @@ def getTFRow(tFactorName):
     newRow = dict()
     newRow["tfName"] = tFactorName
     nGenes = 0
+    bindingSites = 0
     for tissue in tissueNames:
         newRow[tissue] = 0.0
     for index, row in tfDF.iterrows():
-        gName = row['geneFullName']
+        gName = row['geneName']
+        nBindingSites = row['count']
         #this for loo is suposed to have only 1 iteration, unless there are 2
         #or more genes with he same name
         for geneIndex, geneRow in geneFpkmDf[geneFpkmDf.geneName == gName].iterrows():
             nGenes += 1
+            bindingSites += nBindingSites
             for tissue in tissueNames:
-                newRow[tissue] += geneRow[tissue]
+                newRow[tissue] += geneRow[tissue]*nBindingSites
     newRow["genesWithBS"] = nGenes
+    newRow["bindingSites"] = bindingSites
     print("\tDone for " + tFactorName)
     return newRow
 ```
@@ -100,7 +106,7 @@ These columns are computed using Python's "multiprocessing.Pool", to maximize pe
 Output:
 - [tfFPKMinTissues.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/tfFPKMinTissues.tsv)
 
-### Task 2.3 Filtering pairs of Tissue with TF using Z-Score and Quantile
+### Task 2.3: Filtering pairs of Tissue with TF using Z-Score and Quantile
 > When a frequency distribution is normally distributed, we can find out the probability of a score occurring by standardising the scores, known as standard scores (or z scores). The standard normal distribution simply converts the group of data in our frequency distribution such that the mean is 0 and the standard deviation is 1. (Laerd Statistics)
 
 For a transcription factor *tf* and a tissue *ts*, the z-score is:
@@ -157,7 +163,9 @@ Outputs:
 - [zScoreOfTFxTissue-Bottom.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Bottom.tsv)
 - [zScoreOfTFxTissue.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue.tsv)
 
-### Task 2.4 Make TFs files per Tissue
+## Task 3A: Find TFs related to tissues using χ2 test
+
+### Task 3A.1 Make TFs files per Tissue
 Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TFs related with every gene and and using the files .txt found [here](http://177.20.147.141/~pitagoras/TF-findings/input/genesPerTissue/), we can know the genes founded in every tissue. We just want to know what are the transcription factors pertaining in every tissue based on their genes .txt file. So for every gene pertained in a tissue, we will be going to add all the transcription factors related with that gene, leaving just:
 
 | tfName   |
@@ -189,7 +197,7 @@ Output:
 - [testis_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/testis_tfs.txt)
 - [thyriod_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/thyriod_tfs.txt)
 
-### Task 2.5 Filtering quantity of genes for every TF in every tissue
+### Task 3A.2 Filtering quantity of genes for every TF in every tissue
 Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TFs related with every gene and using the files .txt found [here](http://177.20.147.141/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/), we can know all the TFs founded and their frequence in every tissue. We just want to know quantity of genes for every TF in every tissue. So for every TF found in a tissue, we will be going to count his frequency, leaving just:
 
 | tfName   | all_genes | adipose_tissue | adrenal_gland | ... | testis | thyriod |
@@ -203,6 +211,66 @@ The script used to do this was [6-filterGenesByTFs.py](6-filterGenesByTFs.py).
 
 Output:
 - [tfByGenesAndTissues.tsv](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/tfByGenesAndTissues.tsv)
+
+## Task 3B: Finding TFs related to tissues using Monte Carlo approach (compare with random samples)
+
+Input:
+- [Lists of genes related to each tissue]();
+- Count of BS between to a TF in a gene: []();
+
+The input data is used to create several sets and dictionaries:
+```py
+#key: tissueName, value: set of genes representative to tissueName
+genesPerTissue = dict()
+#set of all geneNames
+geneNames = set()
+#set of tfNames
+tfs = set()
+#key: tfName, value: set of genes with at least one binding site to tfName
+genesWithBSTo = dict()
+#key: tissueName, value: list of random subsets of 'geneNames'
+geneSamples = dict()
+#key: (tfName, geneName), value: number of binding sites
+tfbsCount = dict()
+```
+
+Our objective here is to, for each pair of tissue (TS) and transcription factor (TF), compare the number of binding sites to TF on the set of genes related TS, with the number of binding sites to TF on random sets of genes. To do that, we first create 2000 random sets of genes with the same size as the set of genes related to TS. Then we calculate the number of binding sites (to TF) on each of these random sets and save the results in an array. Our final number is the percentile of random binding site counts below or equal to the observed number of binding sites on the set of genes related to TS.
+
+All that is calculated using the following method, given a pair of TSxTF:
+```py
+def getBsCountInSamples(tfName, tissueName):
+    genesWithBS = genesWithBSTo[tfName]
+    bsCountInSamples = []
+    for sample in geneSamples[tissueName]:
+        geneSet = sample.intersection(genesWithBS)
+        bsCount = countBSToTFinGeneSet(geneSet, tfName)
+        bsCountInSamples.append(bsCount)
+    return bsCountInSamples
+            
+def qualifyTFAtTissue(tfName, tissueName):
+    genesWithBS = genesWithBSTo[tfName]
+    genesInTissueWithBs = genesPerTissue[tissueName].intersection(genesWithBS)
+    bsCountInTissue = countBSToTFinGeneSet(genesInTissueWithBs, tfName)
+    bsCountInSamples = getBsCountInSamples(tfName, tissueName)
+    bsCountInSamples.append(bsCountInTissue)
+    
+    npArray = np.asarray(bsCountInSamples)
+    std = npArray.std()
+    median = np.median(npArray)
+    perc = stats.percentileofscore(bsCountInSamples, bsCountInTissue, 'weak')
+    return (perc, median, std, bsCountInTissue, len(genesInTissueWithBs))
+```
+
+Next, all we need to do is filter which pairs of TSxTF are relevant. The criterion is:
+- Percentile being outside of the standard deviation (in the random samples);
+- To be among the most representative to the tissue: percentile >= 95.0;
+- To be among the least representative to the tissue: percentile <= 5.0;
+
+Output:
+- [mostRepresentativeTFsPerTissue.tsv](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/mostRepresentativeTFsPerTissue.tsv);
+- [leastRepresentativeTFsPerTissue](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/leastRepresentativeTFsPerTissue.tsv);
+
+All the code is in [7-selectTFsByRandomSample.py](7-selectTFsByRandomSample.py).
 
 ## References
 

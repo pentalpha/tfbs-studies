@@ -24,7 +24,7 @@ tissueNames = ["adipose_tissue", "adrenal_gland", "brain", "breast", "colon",
            "prostate", "skeletal_muscle", "testis", "thyriod"]
 
 percent = 10.0/2.0
-nSamples = 4000
+nSamples = 2000
 
 #key: tissueName, value: set of genes representative to tissueName
 genesPerTissue = dict()
@@ -160,6 +160,12 @@ def createMainDF():
 
 def createDFs():
     tfAndTissueDF = createMainDF()
+    
+    tfAndTissueDF['is_outside_std'] = tfAndTissueDF.apply(lambda row: 
+        (row['tissue_tfbs'] < row['mt_median'] - row['mt_std'])
+        or (row['tissue_tfbs'] > row['mt_median'] + row['mt_std']), axis = 1)
+    tfAndTissueDF = tfAndTissueDF[tfAndTissueDF.is_outside_std == True]
+        
     topDF = tfAndTissueDF[tfAndTissueDF.mt_percentile >= (100.0 - percent)]
     topDF = topDF.sort_values(['mt_percentile'], ascending=False)
     topDF.to_csv(mostRepresentativeTFsPerTissuePath, sep='\t', index=False)

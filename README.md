@@ -1,7 +1,7 @@
 # tfbs-studies
 Bioinformatics study on transcription factors binding sites (TFBS) and their association with specific tissues.
 
-This repository needs another directory, at the same parent directory, called "input" (or "../input", relatively"). It is available at http://177.20.147.141/~pitagoras/TF-findings/input/.
+This repository needs another directory, at the same parent directory, called "input" (or "../input", relatively"). It is available at http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/input/.
 
 The results are stored in the "../results/" directory. The scripts must be executed in order(1-..., 2-..., 3-... etc).
 
@@ -33,12 +33,12 @@ Ouput size: +- 196MB
 
 1.969.951 lines, almost 2 million transcription factor binding sites related to some gene on the reference input.
 
-Available at: http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenes.bed
+Available at: http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenes.bed
 
 ## Task 2: Finding Transcription Factors related with tissues using FPKM values
 Input data:
-- Human TFBSs intersected with genes in .bed ([link](http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenes.bed))
-- Expression (FPKM) of human genes in each tissue, tabular table in .txt ([link](http://177.20.147.141/~pitagoras/TF-findings/input/table_Human_body_map_ze_FPKM.txt))
+- Human TFBSs intersected with genes in .bed ([link](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenes.bed))
+- Expression (FPKM) of human genes in each tissue, tabular table in .txt ([link](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/input/table_Human_body_map_ze_FPKM.txt))
 
 Desired Output:
 - TFs most or less represented in a single tissue, compared with the others
@@ -64,7 +64,7 @@ For each individual gene, there can be more than one binding site to the same tr
 The script used to do this was [1-filterIntersectionBed.py](1-filterIntersectionBed.py).
 
 Output:
-- [bedIntersectWaWbTFBSinGenesFiltered.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenesFiltered.tsv)
+- [bedIntersectWaWbTFBSinGenesFiltered.tsv](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenesFiltered.tsv)
 
 ### Task 2.2: Transcription Factor representativity in tissues
 > Here’s how you do it for RPKM: First, count up the total reads in a sample and divide that number by 1,000,000 – this is our “per million” scaling factor. Then, divide the read counts by the “per million” scaling factor. This normalizes for sequencing depth, giving you reads per million (RPM). Finally, divide the RPM values by the length of the gene, in kilobases. This gives you RPKM. (RNA-Seq blog)
@@ -110,7 +110,7 @@ In [2-makeTFactorDf.py](2-makeTFactorDf.py)
 These columns are computed using Python's "multiprocessing.Pool", to maximize performance in multi-core systems.
 
 Output:
-- [tfFPKMinTissues.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/tfFPKMinTissues.tsv)
+- [tfFPKMinTissues.tsv](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/tfFPKMinTissues.tsv)
 
 ### Task 2.3: Filtering pairs of Tissue with TF using Z-Score and Quantile
 > When a frequency distribution is normally distributed, we can find out the probability of a score occurring by standardising the scores, known as standard scores (or z scores). The standard normal distribution simply converts the group of data in our frequency distribution such that the mean is 0 and the standard deviation is 1. (Laerd Statistics)
@@ -165,9 +165,9 @@ zScoreBottom.to_csv(zScoreOfTFxTissueBottomPath, sep="\t", index=False)
 In [4-filterTFsByZScore.py](4-filterTFsByZScore.py).
 
 Outputs:
-- [zScoreOfTFxTissue-Top.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Top.tsv)
-- [zScoreOfTFxTissue-Bottom.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Bottom.tsv)
-- [zScoreOfTFxTissue.tsv](http://177.20.147.141/~pitagoras/TF-findings/results/zScoreOfTFxTissue.tsv)
+- [zScoreOfTFxTissue-Top.tsv](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Top.tsv)
+- [zScoreOfTFxTissue-Bottom.tsv](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/zScoreOfTFxTissue-Bottom.tsv)
+- [zScoreOfTFxTissue.tsv](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/zScoreOfTFxTissue.tsv)
 
 ## Task 3A: Find TFs related to tissues using χ2 test
 
@@ -181,27 +181,27 @@ Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TF
 | Pol2-4H8 | 15        |
 | CTCF     | 24        | 
 | CTCF     | 3         |
-| ...      | 7         |
+| ...      | ...       |
 
 The script used to do this was [5-makeTFsPerTissue.py](5-makeTFsPerTissue.py).
 
 Output:
-- [adipose_tissue_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/adipose_tissue_tfs.txt)
-- [adrenal_gland_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/adrenal_gland_tfs.txt)
-- [brain_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/brain_tfs.txt)
-- [breast_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/breast_tfs.txt)
-- [colon_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/colon_tfs.txt)
-- [heart_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/heart_tfs.txt)
-- [kidney_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/kidney_tfs.txt)
-- [leukocyte_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/leukocyte_tfs.txt)
-- [liver_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/liver_tfs.txt)
-- [lung_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/li_tfs.txt)
-- [lymph_node_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/lymph_node_tfs.txt)
-- [ovary_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/ovary_tfs.txt)
-- [prostate_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/prostate_tfs.txt)
-- [skeletal_muscle_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/skeletal_muscle_tfs.txt)
-- [testis_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/testis_tfs.txt)
-- [thyriod_tfs.txt](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/thyriod_tfs.txt)
+- [adipose_tissue_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/adipose_tissue_tfs.txt)
+- [adrenal_gland_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/adrenal_gland_tfs.txt)
+- [brain_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/brain_tfs.txt)
+- [breast_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/breast_tfs.txt)
+- [colon_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/colon_tfs.txt)
+- [heart_tfs.txt](http://http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/heart_tfs.txt)
+- [kidney_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/tfbs-studies/results/TFsPerTissue/kidney_tfs.txt)
+- [leukocyte_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/leukocyte_tfs.txt)
+- [liver_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/liver_tfs.txt)
+- [lung_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/li_tfs.txt)
+- [lymph_node_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/lymph_node_tfs.txt)
+- [ovary_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/ovary_tfs.txt)
+- [prostate_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/prostate_tfs.txt)
+- [skeletal_muscle_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/skeletal_muscle_tfs.txt)
+- [testis_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/testis_tfs.txt)
+- [thyriod_tfs.txt](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/TFsPerTissue/thyriod_tfs.txt)
 
 ### Task 3A.2 Filtering quantity of genes for every TF in every tissue
 Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TFs related with every gene and using the files .txt found [here](http://177.20.147.141/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/), we can know all the TFs founded and their frequence in every tissue. We just want to know quantity of genes for every TF in every tissue. So for every TF found in a tissue, we will be going to count his frequency, leaving just:
@@ -216,7 +216,40 @@ Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TF
 The script used to do this was [6-filterGenesByTFs.py](6-filterGenesByTFs.py).
 
 Output:
-- [tfByGenesAndTissues.tsv](http://10.7.5.38/~bif/luiseduardo/tfbs-studies/results/tfByGenesAndTissues.tsv)
+- [tfByGenesAndTissues.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/tfByGenesAndTissues.tsv)
+
+### Task 3A.3 Make χ2 test for every TF in every tissue
+Using the file named tfByGenesAndTissues.tsv, we can know the frequence of every TF related with a gene in a tissue. So we just want to know if the expression of an TF is depleted or incresed in a tissue. For this we use the chi-square test, this test is used to quantitatively evaluate the relationship between the outcome of an experiment and the expected distribution of the phenomenon. In this case, the observed value is the frequency value of tf in each tissue and the expected value is the division of total tissue genes by the total of existing genes multiplied by the frequency value of tf in all genes. Using the equation below, where the summation occurs when multiple features are observed, however, in this case we are only observing one feature, the frequency. So we can find the value of the chi square:
+![Chi Square Equantion](/images/chi-equation.png)
+
+From the value of chi square, we can find the value of p-value using stats.chi2.cdf function from SciPy module with degree of freedom equal to 1, where the degree of freedom represents the number of features, which represents the probability of observing a statistic test at least as extreme in a chi-squared distribution. Then we will filter the tfs with p-values less than 0.05 and say if they are depleted or increased. So for every TF found in a tissue, we will be going to calculate your qui square and p value and show if the TF is depleted or increased, leaving just:
+
+| tfName        | Chi-Square Test   | P-Value             | State     |
+|---------------|-------------------|---------------------|-----------|
+| STAT3         | 8.106659609271945 | 0.00441029237877788 | Depleted  | 
+| ELF1_(SC-631) | 5.50034717859778  | 0.01901269858244259 | Increased | 
+| NFKB          | 5.461921858500528 | 0.01943525906064092 | Increased | 
+| ...           | ...               | ...                 | ...       | 
+
+The script used to do this was [8-chiSquaredOf-TFsPerTissue.py](8-chiSquaredOf-TFsPerTissue.py).
+
+Output:
+- [adipose_tissue_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/adipose_tissue_chi.tsv)
+- [adrenal_gland_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/adrenal_gland_chi.tsv)
+- [brain_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/brain_chi.tsv)
+- [breast_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/breast_chi.tsv)
+- [colon_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/colon_chi.tsv)
+- [heart_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/heart_chi.tsv)
+- [kidney_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/kidney_chi.tsv)
+- [leukocyte_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/leukocyte_chi.tsv)
+- [liver_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/liver_chi.tsv)
+- [lung_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/li_chi.tsv)
+- [lymph_node_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/lymph_node_chi.tsv)
+- [ovary_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/ovary_chi.tsv)
+- [prostate_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/prostate_chi.tsv)
+- [skeletal_muscle_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/skeletal_muscle_chi.tsv)
+- [testis_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/testis_chi.tsv)
+- [thyriod_chi.tsv](http://work.bioinformatics-brazil.org/~bif/luiseduardo/tfbs-studies/results/chiSquaredTFsPerTissue/thyriod_chi.tsv)
 
 ## Task 3B: Finding TFs related to tissues using Monte Carlo approach (compare with random samples)
 

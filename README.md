@@ -5,6 +5,12 @@ This repository needs another directory, at the same parent directory, called "i
 
 The results are stored in the "../results/" directory. The scripts must be executed in order(1-..., 2-..., 3-... etc).
 
+## Tasks:
+- [Task 1. Finding TFBSs for each gene](https://github.com/pentalpha/tfbs-studies#task-1-finding-tfbss-for-each-gene);
+- [Task 2: Finding Transcription Factors related with tissues using FPKM values](https://github.com/pentalpha/tfbs-studies#task-2-finding-transcription-factors-related-with-tissues-using-fpkm-values);
+- [Task 3A: Find TFs related to tissues using χ2 test](https://github.com/pentalpha/tfbs-studies#task-3a-find-tfs-related-to-tissues-using-χ2-test);
+- [Task 3B: Finding TFs related to tissues using Monte Carlo approach](https://github.com/pentalpha/tfbs-studies#task-3b-finding-tfs-related-to-tissues-using-monte-carlo-approach-compare-with-random-samples);
+
 ## Task 1. Finding TFBSs for each gene
 
 First we need to know that **transcription** is the process where a gene's DNA sequence is copied (transcribed) into 
@@ -215,8 +221,8 @@ Output:
 ## Task 3B: Finding TFs related to tissues using Monte Carlo approach (compare with random samples)
 
 Input:
-- [Lists of genes related to each tissue]();
-- Count of BS between to a TF in a gene: []();
+- [Lists of genes related to each tissue](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/input/genesPerTissue/);
+- Count of BS between to a TF in a gene: [bedIntersectWaWbTFBSinGenesFiltered.tsv](http://work.bioinformatics-brazil.org/~pitagoras/TF-findings/results/bedIntersectWaWbTFBSinGenesFiltered.tsv);
 
 The input data is used to create several sets and dictionaries:
 ```py

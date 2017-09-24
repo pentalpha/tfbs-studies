@@ -220,7 +220,10 @@ Output:
 
 ### Task 3A.3 Make χ2 test for every TF in every tissue
 Using the file named tfByGenesAndTissues.tsv, we can know the frequence of every TF related with a gene in a tissue. So we just want to know if the expression of an TF is depleted or incresed in a tissue. For this we use the chi-square test, this test is used to quantitatively evaluate the relationship between the outcome of an experiment and the expected distribution of the phenomenon. In this case, the observed value is the frequency value of tf in each tissue and the expected value is the division of total tissue genes by the total of existing genes multiplied by the frequency value of tf in all genes. Using the equation below, where the summation occurs when multiple features are observed, however, in this case we are only observing one feature, the frequency. So we can find the value of the chi square:
+
+
 ![Chi Square Equantion](/images/chi-equation.png)
+
 
 From the value of chi square, we can find the value of p-value using stats.chi2.cdf function from SciPy module with degree of freedom equal to 1, where the degree of freedom represents the number of features, which represents the probability of observing a statistic test at least as extreme in a chi-squared distribution. Then we will filter the tfs with p-values less than 0.05 and say if they are depleted or increased. So for every TF found in a tissue, we will be going to calculate your qui square and p value and show if the TF is depleted or increased, leaving just:
 

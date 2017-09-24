@@ -74,7 +74,7 @@ Output:
 Now we want to calculate, for each transcription factor, the sum of the FPKMs (of each tissue) of the genes which have binding sites to that transcription factor. The resulting table would have the following columns:
 
 tfName | adipose_tissue | adrenal_gland | ... | genesWithBS | bindingSites | mean | stDeviation
---- | --- | --- | --- | --- | --- | ---
+ --- | --- | --- | --- | --- | --- | --- | ---
 Transcription Factor name | Sum of the FPKMs in adipose tissue | the same for adrenal_gland | more sums for more tissues | Count of genes with binding sites to TF | Total of binding sites to the TF in all tissues | Mean FPKM sum | Standard deviation of FPKM sum
 
 This is similar to the reference expression file with the FPKM values, but this table is about the transcription factors, not the genes.
@@ -174,14 +174,14 @@ Outputs:
 ### Task 3A.1 Make TFs files per Tissue
 Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TFs related with every gene and and using the files .txt found [here](http://177.20.147.141/~pitagoras/TF-findings/input/genesPerTissue/), we can know the genes founded in every tissue. We just want to know what are the transcription factors pertaining in every tissue based on their genes .txt file. So for every gene pertained in a tissue, we will be going to add all the transcription factors related with that gene, leaving just:
 
-| tfName   |
-|----------|
-| ...      |
-| NF-YA    |
-| Pol2-4H8 |
-| CTCF     |
-| CTCF     |
-| ...      |
+| tfName   | frequency | 
+|----------|-----------|
+| ...      |  ...      | 
+| NF-YA    | 2         |
+| Pol2-4H8 | 15        |
+| CTCF     | 24        | 
+| CTCF     | 3         |
+| ...      | 7         |
 
 The script used to do this was [5-makeTFsPerTissue.py](5-makeTFsPerTissue.py).
 
@@ -206,12 +206,12 @@ Output:
 ### Task 3A.2 Filtering quantity of genes for every TF in every tissue
 Using the file named bedIntersectWaWbTFBSinGenesFiltered.tsv, we can know the TFs related with every gene and using the files .txt found [here](http://177.20.147.141/~bif/luiseduardo/tfbs-studies/results/TFsPerTissue/), we can know all the TFs founded and their frequence in every tissue. We just want to know quantity of genes for every TF in every tissue. So for every TF found in a tissue, we will be going to count his frequency, leaving just:
 
-| tfName   | all_genes | adipose_tissue | adrenal_gland | ... | testis | thyriod |
-|----------|-----------|----------------|---------------|-----|--------|---------|
-| Pol2     | 76789     | 12             | 26            | ... | 739    | 13      |
-| Pol2-4H8 | 63732     | 4              | 30            | ... | 628    | 11      |
-| TAF1     | 58550     | 3              | 26            | ... | 563    | 9       |
-| ...      | ...       | ...            | ...           | ... | ...    | ...     |
+| tfName   | adipose_tissue | adrenal_gland | ... | testis | thyriod | allTissues | allGenes |
+|----------|----------------|---------------|-----|--------|---------|------------|----------|
+| Pol2     | 12             | 26            | ... | 739    | 13      |    1820	  |   17326  |
+| Pol2-4H8 | 4              | 30            | ... | 628    | 11      |    1254	  |   15210  |
+| TAF1     | 3              | 26            | ... | 563    | 9       |    1112	  |   14875  |
+| ...      | ...            | ...           | ... | ...    | ...     |    ...     |    ...   |
 
 The script used to do this was [6-filterGenesByTFs.py](6-filterGenesByTFs.py).
 

@@ -57,7 +57,7 @@ HEY1 | MIR1302-10 | 2
 ... | ...
 
 All this says is that MIR1302-11 and WASH7P have binding sites to TAF1, MIR1302-2 and MIR1302-10 have to HEY1 and so on...
-The names at "gene" are an abreviation of the gene name column at the original .bed file. Gene names not found at the reference FPKM file are discarted.
+The names at "gene" are an abbreviation of the gene name column at the original .bed file. Gene names not found at the reference FPKM file are discarted.
 
 For each individual gene, there can be more than one binding site to the same transcription factor. The 'count' column is this number of binding sites.
 
